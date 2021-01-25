@@ -206,9 +206,12 @@ module.exports = {
                         importLoaders: 2,
                         minimize: true,
                         sourceMap: shouldUseSourceMap,
-                        modules: process.env.CSS_MODULES ? process.env.CSS_MODULES == 'true' : true,
+                        modules: process.env.CSS_MODULES
+                          ? process.env.CSS_MODULES == 'true'
+                          : true,
                         camelCase: true,
-                        localIdentName: '[path][name]__[local]--[hash:base64:5]',
+                        localIdentName:
+                          '[path][name]__[local]--[hash:base64:5]',
                       },
                     },
                     {
@@ -233,9 +236,6 @@ module.exports = {
                     },
                     {
                       loader: require.resolve('sass-loader'),
-                      options: {
-                        sourceMap: true,
-                      },
                     },
                   ],
                 },
@@ -243,6 +243,17 @@ module.exports = {
               )
             ),
             // Note: this won't work without `new ExtractTextPlugin()` in `plugins`.
+          },
+          // This loader will load markdown files as raw string.
+          {
+            test: /\.md$/,
+            loader: require.resolve('raw-loader'),
+          },
+          // This loader allows to parse SVG as JSX
+          {
+            test: /\.inline\.svg$/,
+            exclude: /node_modules/,
+            loader: 'svg-react-loader',
           },
           // "file" loader makes sure assets end up in the `build` folder.
           // When you `import` an asset, you get its filename.
@@ -318,6 +329,9 @@ module.exports = {
     // Note: this won't work without ExtractTextPlugin.extract(..) in `loaders`.
     new ExtractTextPlugin({
       filename: cssFilename,
+      // In case of using code splitting, async bundles still use style loader. Set this
+      // flag to true to create main css bundle
+      allChunks: process.env.EXTRACT_CSS_FROM_ALL_CHUNKS === 'true',
     }),
     // Generate a manifest file which contains a mapping of all asset filenames
     // to their corresponding output file so that tools can pick it up without
@@ -370,5 +384,6 @@ module.exports = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty',
+    constants: process.env.USE_NODE_CONSTANTS === 'true',
   },
 };

@@ -41,8 +41,6 @@ module.exports = {
   // This means they will be the "root" imports that are included in JS bundle.
   // The first two entry points enable "hot" CSS and auto-refreshes for JS.
   entry: [
-    // React Hot Loader v3
-    require.resolve('react-hot-loader/patch'),
     // Include an alternative client for WebpackDevServer. A client's job is to
     // connect to WebpackDevServer by a socket and get notified about changes.
     // When you save a file, the client will either apply hot updates (in case
@@ -163,7 +161,6 @@ module.exports = {
             test: /\.(js|jsx|mjs)$/,
             include: paths.appSrc,
             use: [
-              require.resolve('react-hot-loader/webpack'),
               {
                 loader: require.resolve('babel-loader'),
                 options: {
@@ -175,8 +172,8 @@ module.exports = {
                   // directory for faster rebuilds.
                   cacheDirectory: true,
                 },
-              }
-            ]
+              },
+            ],
           },
           // "postcss" loader applies autoprefixer to our CSS.
           // "css" loader resolves paths in CSS and adds assets as dependencies.
@@ -191,7 +188,9 @@ module.exports = {
                 loader: require.resolve('css-loader'),
                 options: {
                   importLoaders: 2,
-                  modules: process.env.CSS_MODULES ? process.env.CSS_MODULES == 'true' : true,
+                  modules: process.env.CSS_MODULES
+                    ? process.env.CSS_MODULES == 'true'
+                    : true,
                   camelCase: true,
                   localIdentName: '[path][name]__[local]--[hash:base64:5]',
                 },
@@ -220,6 +219,17 @@ module.exports = {
                 loader: require.resolve('sass-loader'),
               },
             ],
+          },
+          // This loader will load markdown files as raw string.
+          {
+            test: /\.md$/,
+            loader: require.resolve('raw-loader'),
+          },
+          // This loader allows to parse SVG as JSX
+          {
+            test: /\.inline\.svg$/,
+            exclude: /node_modules/,
+            loader: 'svg-react-loader',
           },
           // "file" loader makes sure those assets get served by WebpackDevServer.
           // When you `import` an asset, you get its (virtual) filename.
@@ -285,6 +295,7 @@ module.exports = {
     net: 'empty',
     tls: 'empty',
     child_process: 'empty',
+    constants: process.env.USE_NODE_CONSTANTS === 'true',
   },
   // Turn off performance hints during development because we don't do any
   // splitting or minification in interest of speed. These warnings become
